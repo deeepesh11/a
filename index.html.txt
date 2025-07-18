@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Professional text summarization tool using BART model">
+    <title>BART Text Summarizer | AI-Powered Summarization</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --warning-color: #f8961e;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: #f5f7fa;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .app-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .app-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .app-header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .input-section {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 200px;
+            transition: var(--transition);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .char-counter {
+            text-align: right;
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: var(--dark-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+
+        .output-section {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .output-header h2 {
+            color: var(--primary-color);
+        }
+
+        .stats {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .output-content {
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .output-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .app-footer {
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: 3rem;
+            color: #6c757d;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+
+        .credits {
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .app-header h1 {
+                font-size: 2rem;
+            }
+            
+            .output-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .stats {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1><i class="fas fa-align-left"></i> BART Text Summarizer</h1>
+            <p class="subtitle">AI-powered abstractive summarization using Facebook's BART model</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="input-section">
+            <form id="summarize-form" method="POST">
+                <div class="form-group">
+                    <label for="input_text">Text to Summarize</label>
+                    <textarea id="input_text" name="input_text" placeholder="Paste your article, document, or any lengthy text here..." required>{{ request.form.get('input_text', '') }}</textarea>
+                    <div class="char-counter"><span id="char-count">0</span> characters</div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-magic"></i> Generate Summary
+                    </button>
+                    <button type="button" id="clear-btn" class="btn btn-secondary">
+                        <i class="fas fa-trash-alt"></i> Clear
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        {% if summary %}
+        <section class="output-section">
+            <div class="output-header">
+                <h2><i class="fas fa-file-contract"></i> Summary</h2>
+                <div class="stats">
+                    <span class="stat-item">
+                        <i class="fas fa-ruler-combined"></i> 
+                        <span id="original-length">{{ request.form.get('input_text', '')|length }}</span> → 
+                        <span id="summary-length">{{ summary|length }}</span> chars
+                    </span>
+                    <span class="stat-item">
+                        <i class="fas fa-compress-alt"></i> 
+                        <span id="reduction">{{ ((1 - (summary|length / request.form.get('input_text', '')|length)) * 100 | round(1) }}%</span> reduction
+                    </span>
+                </div>
+            </div>
+            <div class="output-content">
+                <p>{{ summary }}</p>
+            </div>
+            <div class="output-actions">
+                <button id="copy-btn" class="btn btn-secondary">
+                    <i class="far fa-copy"></i> Copy to Clipboard
+                </button>
+            </div>
+        </section>
+        {% endif %}
+    </main>
+
+    <footer class="app-footer">
+        <div class="container">
+            <p>Powered by BART (Bidirectional and Auto-Regressive Transformers) model</p>
+            <p class="credits">Developed by [Your Name] | <a href="#" id="privacy-link">Privacy Policy</a></p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Character counter
+            const textarea = document.getElementById('input_text');
+            const charCount = document.getElementById('char-count');
+            
+            if (textarea && charCount) {
+                textarea.addEventListener('input', function() {
+                    charCount.textContent = this.value.length;
+                });
+                
+                // Initialize count
+                charCount.textContent = textarea.value.length;
+            }
+
+            // Clear button
+            const clearBtn = document.getElementById('clear-btn');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function() {
+                    textarea.value = '';
+                    charCount.textContent = '0';
+                });
+            }
+
+            // Copy to clipboard
+            const copyBtn = document.getElementById('copy-btn');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', function() {
+                    const summaryText = document.querySelector('.output-content p').innerText;
+                    navigator.clipboard.writeText(summaryText).then(() => {
+                        const originalText = copyBtn.innerHTML;
+                        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                        setTimeout(() => {
+                            copyBtn.innerHTML = originalText;
+                        }, 2000);
+                    });
+                });
+            }
+
+            // Form submission loading state
+            const form = document.getElementById('summarize-form');
+            if (form) {
+                form.addEventListener('submit', function() {
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
